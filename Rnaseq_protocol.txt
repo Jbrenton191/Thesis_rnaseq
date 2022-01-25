@@ -1,0 +1,36 @@
+Rnaseq full protocol
+
+1. downloaded files into folder 18month on SEAGATE
+2. ran fastqc on all files (used fastqc_script.sh)
+3. ran multiqc on report
+4. ran trim galore script in folder on data (mistake was that the file text to generate file list-put other files too as well as fastqc files)
+5. ran multiq report, and in folder mutliqc report 1
+6. moved gencode.vM23.transcripts.fa.gz to the folder
+7. ran index on this file, salmon index -t gencode.vM23.transcripts.fa.gz -i gencode.vM23.transcripts_index_17_04_2020 -k 31
+8. ran salmon with script : salmon quant.sf
+9. ran multiqc and in folder- multiqc_data_2
+10. text wrangled gencode.vM23.transcripts.fa.gz using code:
+gzcat gencode.vM23.transcripts.fa.gz | grep ENSMUST | awk -F"|" '{print $1,$2,$6}' | sed 's/>//' >genecode_txid_to_geneid_18mo.txt
+11. moved genecode_txid_to_geneid_18mo.txt to 18 month folder
+12. then took out version info
+13. cat genecode_txid_to_geneid_18mo.txt | awk -F " " '{print $1,$2}' | sed 's/.*//g' > genecode_txid_to_geneid_version_removed.txt
+14. cat genecode_txid_to_geneid_18mo.txt | awk -F " " '{print $3}' > genes.txt
+15. ## concatenate variables:
+
+!!!!!! the above was messed up and there was an extra number on the ENSG column if version info was .10 or higher
+
+$ A= genecode_txid_to_geneid_version_removed.txt
+$ A+=genes.txt
+$ echo "$A"
+X Y Z
+
+
+
+16. So re-did with following code:
+
+cat genecode_txid_to_geneid_18mo.txt | awk -F " " '{print $1, $2}' | sed s/\\.[0-9]*//g > x
+cat genecode_txid_to_geneid_18mo.txt | awk -F " " '{print $3}' > y
+paste -d " " x y > genecode_txid_to_geneid_final.txt
+
+
+cat genecode_txid_to_geneid_18mo.txt | awk -F " " '{print $1}' | sed s/\\..*//g > z
